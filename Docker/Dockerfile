@@ -35,3 +35,5 @@ RUN rosdep update && bash -c  "source /opt/ros/noetic/setup.bash \
 # RUN bash -c  "source /opt/ros/noetic/setup.bash \
 # && cd catkin_ws && source devel/setup.bash && \
 #cd src/ORB_SLAM3-master && sh build.sh && sh build_ros.sh"
+echo "source /opt/ros/noetic/setup.bash" >> .bashrc
+
