@@ -49,6 +49,7 @@ MESSAGE(${OpenCV_VERSION})
 
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
+find_package(Torch REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
@@ -59,6 +60,7 @@ ${Pangolin_INCLUDE_DIRS}
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 add_library(${PROJECT_NAME} SHARED
 src/System.cc
@@ -87,6 +89,7 @@ src/CameraModels/Pinhole.cpp
 src/CameraModels/KannalaBrandt8.cpp
 src/OptimizableTypes.cpp
 src/MLPnPsolver.cpp
+src/TwoViewReconstruction.cc
 include/System.h
 include/Tracking.h
 include/LocalMapping.h
@@ -115,7 +118,9 @@ include/CameraModels/KannalaBrandt8.h
 include/OptimizableTypes.h
 include/MLPnPsolver.h
 include/TwoViewReconstruction.h
-src/TwoViewReconstruction.cc)
+include/Extractor.h
+include/torchextractor.h
+)
 
 add_subdirectory(Thirdparty/g2o)
 
@@ -127,8 +132,10 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 -lboost_serialization
 -lcrypto
+"${TORCH_LIBRARIES}"
 )
 
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 
 # Build examples
 
