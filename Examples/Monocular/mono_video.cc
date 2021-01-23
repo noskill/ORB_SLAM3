@@ -30,6 +30,11 @@
 #include"System.h"
 #include "Converter.h"
 
+#if (CV_MAJOR_VERSION > 3)
+#include <opencv2/imgproc.hpp>
+#define CV_BGR2GRAY cv::COLOR_BGR2GRAY
+#endif
+
 using namespace std;
 
 double ttrack_tot = 0;
