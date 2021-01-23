@@ -27,6 +27,8 @@
 #include <opencv/cv.h>
 #endif
 
+#include "Extractor.h"
+
 
 namespace ORB_SLAM3
 {
@@ -44,7 +46,7 @@ public:
     bool bNoMore;
 };
 
-class ORBextractor
+class ORBextractor: public Extractor
 {
 public:
     
@@ -66,7 +68,8 @@ public:
         return nlevels;}
 
     float inline GetScaleFactor(){
-        return scaleFactor;}
+        return scaleFactor;
+    }
 
     std::vector<float> inline GetScaleFactors(){
         return mvScaleFactor;
@@ -84,6 +87,10 @@ public:
         return mvInvLevelSigma2;
     }
 
+    std::vector<cv::Mat> & getImagePyramid(){
+        return mvImagePyramid;
+    }
+
     std::vector<cv::Mat> mvImagePyramid;
 
 protected:
@@ -97,7 +104,7 @@ protected:
     std::vector<cv::Point> pattern;
 
     int nfeatures;
-    double scaleFactor;
+    float scaleFactor;
     int nlevels;
     int iniThFAST;
     int minThFAST;
