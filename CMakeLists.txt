@@ -208,3 +208,7 @@ Examples/Stereo-Inertial/stereo_inertial_tum_vi.cc)
 target_link_libraries(stereo_inertial_tum_vi ${PROJECT_NAME})
 
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/build_voc/)
+add_executable(gen_voc Examples/build_voc/build_voc.cc)
+target_link_libraries(gen_voc ${PROJECT_NAME})
+target_include_directories(gen_voc PUBLIC ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/)
