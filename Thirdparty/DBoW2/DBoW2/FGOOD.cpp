@@ -1,15 +1,13 @@
 /**
  * File: FGOOD.cpp
- * Date: June 2012
- * Author: Dorian Galvez-Lopez
- * Description: functions for GOOD descriptors
- * License: see the LICENSE.txt file
+ * Author: Anatoly Belikov
+ * Description: functions for GOODPoints descriptors
+ * License: BSD
  *
- * Distance function has been modified 
  *
  */
 
- 
+
 #include <vector>
 #include <cassert>
 #include <string>
@@ -30,10 +28,10 @@ namespace DBoW2 {
 
 const int FGOOD::L=256;
 
-void FGOOD::meanValue(const std::vector<FGOOD::pDescriptor> &descriptors, 
+void FGOOD::meanValue(const std::vector<FGOOD::pDescriptor> &descriptors,
   FGOOD::TDescriptor &mean)
 {
-	FGOOD::TDescriptor result = cv::Mat::zeros(cv::Size(1, FGOOD::L), CV_32F);
+	FGOOD::TDescriptor result = cv::Mat::zeros(1, FGOOD::L, CV_32F);
 	// iterative mean
 	// http://www.heikohoffmann.de/htmlthesis/node134.html
 	for(std::size_t i=0; i < descriptors.size(); i++){
@@ -44,7 +42,7 @@ void FGOOD::meanValue(const std::vector<FGOOD::pDescriptor> &descriptors,
 }
 
 // --------------------------------------------------------------------------
-  
+
 double FGOOD::distance(const FGOOD::TDescriptor &a,
   const FGOOD::TDescriptor &b)
 {
@@ -53,42 +51,42 @@ double FGOOD::distance(const FGOOD::TDescriptor &a,
 }
 
 // --------------------------------------------------------------------------
-  
+
 std::string FGOOD::toString(const FGOOD::TDescriptor &a)
 {
   stringstream ss;
   const float *p = a.ptr<float>();
-  
+
   for(int i = 0; i < a.cols; ++i, ++p)
   {
     ss << (float)*p << " ";
   }
-  
+
   return ss.str();
 }
 
 // --------------------------------------------------------------------------
-  
+
 void FGOOD::fromString(FGOOD::TDescriptor &a, const std::string &s)
 {
   a.create(1, FGOOD::L);
   float *p = a.ptr<float>();
-  
+
   stringstream ss(s);
   for(int i = 0; i < FGOOD::L; ++i, ++p)
   {
     float n;
     ss >> n;
-    
-    if(!ss.fail()) 
+
+    if(!ss.fail())
       *p = n;
   }
-  
+
 }
 
 // --------------------------------------------------------------------------
 
-void FGOOD::toMat32F(const std::vector<TDescriptor> &descriptors, 
+void FGOOD::toMat32F(const std::vector<TDescriptor> &descriptors,
   cv::Mat &mat)
 {
   if(descriptors.empty())
@@ -96,18 +94,18 @@ void FGOOD::toMat32F(const std::vector<TDescriptor> &descriptors,
     mat.release();
     return;
   }
-  
+
   const size_t N = descriptors.size();
-  
+
   mat.create(N, FGOOD::L, CV_32F);
   float *p;
-  
+
   for(size_t i = 0; i < N; ++i)
   {
-    assert(descriptors.type() == mat.type());
+    assert(descriptors[i].type() == mat.type());
     p = mat.ptr<float>(i);
     (*p) = *(descriptors[i].data);
-  } 
+  }
 }
 
 // --------------------------------------------------------------------------

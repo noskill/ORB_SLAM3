@@ -1,9 +1,8 @@
 /**
  * File: FGOOD.h
- * Date: June 2012
- * Author: Dorian Galvez-Lopez
- * Description: functions for GOOD descriptors
- * License: see the LICENSE.txt file
+ * Author: Anatoly Belikov
+ * Description: functions for GOODPoints descriptors
+ * License: BSD
  *
  */
 
