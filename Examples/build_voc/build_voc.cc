@@ -1,60 +1,77 @@
 #include <ostream>
 #include <iostream>
+#include <DBoW2/BowVector.h>
 #include "DBoW2/FGOOD.h"
+#include <opencv2/opencv.hpp>
+#include "goodvocabulary.h"
 
 using namespace DBoW2;
 
-vector<vector<cv::Mat > > loadFeatures();
-void createVoc(const vector<vector<cv::Mat > > & features);
-void testDatabase(const vector<vector<cv::Mat > > &features);
-void changeStructure(const cv::Mat &plain, vector<cv::Mat> &out);
+std::vector<std::vector<cv::Mat_<float> > > loadFeatures();
+void createVoc(const std::vector<std::vector<cv::Mat_<float> > > & features);
+void testDatabase(const std::vector<std::vector<cv::Mat_<float> > > &features);
+void changeStructure(const cv::Mat &plain, std::vector<cv::Mat_<float> > &out);
+
+typedef std::vector<std::vector<cv::Mat_<float> > > feature_vector;
 
 
-vector<vector<cv::Mat > > loadFeatures()
+feature_vector loadFeatures()
 {
-  vector<vector<cv::Mat > > features;
+  feature_vector features;
   features.clear();
   features.reserve(10000);
 
   std::string delimiter = " ";
-  cout << "Extracting ORB features..." << endl;
-  long i = 0;
+  std::cout << "loading GOODPOINT features..." << std::endl;
+  long img_num = 0;
+  long line_num = 0;
+  long start = 0;
   cv::Mat descriptors;
   for (std::string line; std::getline(std::cin, line);) {
-      stringstream ss;
-      ss << "image " << i << std::endl;
-      if (str.find_first_not_of(" \t\n\v\f\r") != std::string::npos)
+      std::stringstream ss;
+      if (line.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
       {
-         // There's a non-space.
-      	 features.push_back(vector<cv::Mat >());
+         ss << "image " << img_num << std::endl;
+      	 features.push_back(std::vector<cv::Mat_<float> >());
          changeStructure(descriptors, features.back());
+	 std::cout << "lines read: " << line_num - start << std::endl;
+	 std::cout << "descriptors shape: " << descriptors.size() << std::endl;
+	 img_num ++;
+	 start = line_num;
 	 descriptors = cv::Mat();
+	 if (img_num % 300 == 0){
+             std::cout << "img num " << img_num << std::endl;
+	 }
+         if (30000 == img_num) {
+             break;
+         }
+	 continue;
       }
 
-      stringstream check1(line);
+      std::stringstream check1(line);
 
-      string current;
+      std::string current;
 
-      cv::Mat row(1, 256, CV_32FC);
+      cv::Mat row(1, 256, CV_32FC1);
       // Tokenizing w.r.t. space ' '
       unsigned short i = 0;
       while(getline(check1, current, ' '))
       {
-	 float curr_float = ::atof(current);
-	 row.at(0, i) = curr_float;
+	 float curr_float = ::atof(current.c_str());
+	 row.at<float>(0, i) = curr_float;
+	 assert(row.at<float>(0, i) == curr_float);
 	 i++ ;
+	 assert(i < 300);
       }
-      assert(i == 255);
+      assert(i == 256);
       descriptors.push_back(row);
-  }
-}
-
-
+      line_num ++;
 
   }
+  return features;
 }
 
-void changeStructure(const cv::Mat &plain, vector<cv::Mat> &out)
+void changeStructure(const cv::Mat &plain, std::vector<cv::Mat_<float> > &out)
 {
   out.resize(plain.rows);
 
@@ -64,7 +81,7 @@ void changeStructure(const cv::Mat &plain, vector<cv::Mat> &out)
   }
 }
 
-void createVoc(const vector<vector<cv::Mat > > & features){
+void createVoc(const std::vector<std::vector<cv::Mat_<float> > > & features){
   // branching factor and depth levels from DBoW2 paper
   // should be good for now
   const int k = 10;
@@ -72,7 +89,7 @@ void createVoc(const vector<vector<cv::Mat > > & features){
   const WeightingType weight = TF_IDF;
   const ScoringType scoring = L1_NORM;
 
-  OrbVocabulary voc(k, L, weight, scoring);
+  ORB_SLAM3::GOODVocabulary voc(k, L, weight, scoring);
 
   std::cout << "Creating a goodpoint " << k << "^" << L << " vocabulary..." << std::endl;
   voc.create(features);
@@ -87,21 +104,23 @@ void createVoc(const vector<vector<cv::Mat > > & features){
   std::cout << "Done" <<std::endl;
 }
 
-void testDatabase(const vector<vector<cv::Mat > > &features)
+void testDatabase(const std::vector<std::vector<cv::Mat_<float> > > &features)
 {
-  std::cout << "Creating a small database..." <<std::endl;
 
+  std::cout << "Reading dbow from " << "good_voc.json" << std::endl;
   // load the vocabulary from disk
-  OrbVocabulary voc("good_voc.yml.gz");
+  ORB_SLAM3::GOODVocabulary voc;
+  voc.load_json("good_voc.json");
 
-  OrbDatabase db(voc, false, 0); // false = do not use direct index
+  std::cout << "Creating a small database..." <<std::endl;
+  ORB_SLAM3::GOODDatabase db(voc, false, 0); // false = do not use direct index
   // (so ignore the last param)
   // The direct index is useful if we want to retrieve the features that
   // belong to some vocabulary node.
   // db creates a copy of the vocabulary, we may get rid of "voc" now
 
   // add images to the database
-  for(int i = 0; i < NIMAGES; i++)
+  for(int i = 0; i < 1000; i++)
   {
     db.add(features[i]);
   }
@@ -114,7 +133,7 @@ void testDatabase(const vector<vector<cv::Mat > > &features)
   std::cout << "Querying the database: " <<std::endl;
 
   QueryResults ret;
-  for(int i = 0; i < NIMAGES; i++)
+  for(int i = 0; i < 100; i++)
   {
     db.query(features[i], ret, 4);
 
@@ -134,11 +153,14 @@ void testDatabase(const vector<vector<cv::Mat > > &features)
 
   // once saved, we can load it again
   std::cout << "Retrieving database once again..." <<std::endl;
-  OrbDatabase db2("good_db.yml.gz");
+  ORB_SLAM3::GOODDatabase db2("good_db.yml.gz");
   std::cout << "... done! This is: " << std::endl << db2 <<std::endl;
 }
 
 
 int main(int argc, char ** argv){
+    feature_vector features = loadFeatures();
+//    createVoc(features);
+    testDatabase(features);
     return 0;
 }

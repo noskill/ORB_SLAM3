@@ -51,16 +51,26 @@ find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(Torch REQUIRED)
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+set(RAPIDJSON_INCLUDE_DIR "" CACHE FILEPATH "Path to rapidjson includes")
+
+if(NOT EXISTS ${RAPIDJSON_INCLUDE_DIR}/rapidjson/rapidjson.h)
+        message(FATAL_ERROR "Can't find rapidjson.h in ${RAPIDJSON_INCLUDE_DIR}/rapidjson")
+endif()
+
+
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
 ${PROJECT_SOURCE_DIR}/include/CameraModels
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
+${RAPIDJSON_INCLUDE_DIR}
 )
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
 
 add_library(${PROJECT_NAME} SHARED
 src/System.cc
@@ -207,8 +217,13 @@ add_executable(stereo_inertial_tum_vi
 Examples/Stereo-Inertial/stereo_inertial_tum_vi.cc)
 target_link_libraries(stereo_inertial_tum_vi ${PROJECT_NAME})
 
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/build_voc/)
+
 add_executable(gen_voc Examples/build_voc/build_voc.cc)
-target_link_libraries(gen_voc ${PROJECT_NAME})
-target_include_directories(gen_voc PUBLIC ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/)
+
+target_link_libraries(gen_voc 
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+	${PROJECT_NAME})
+
+target_include_directories(gen_voc PUBLIC ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/ 
+	${RAPIDJSON_INCLUDE_DIR})

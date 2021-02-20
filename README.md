@@ -1,5 +1,14 @@
 # ORB-SLAM3
 
+It's a fork of ORB_SLAM3 with pytorch models for keypoint extraction and description
+to build add rapidjson and libtorch paths:
+
+for example:
+
+```
+cmake .. -DRAPIDJSON_INCLUDE_DIR=~/projects/rapidjson/include/ -DCMAKE_PREFIX_PATH=~/projects/libtorch/
+```
+
 ### V0.3: Beta version, 4 Sep 2020
 **Authors:** Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, [José M. M. Montiel](http://webdiis.unizar.es/~josemari/), [Juan D. Tardos](http://webdiis.unizar.es/~jdtardos/).
 

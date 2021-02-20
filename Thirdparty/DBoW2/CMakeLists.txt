@@ -11,12 +11,14 @@ set(HDRS_DBOW2
   DBoW2/FClass.h       
   DBoW2/FeatureVector.h
   DBoW2/ScoringObject.h   
+  DBoW2/QueryResults.h
   DBoW2/TemplatedVocabulary.h)
 set(SRCS_DBOW2
   DBoW2/BowVector.cpp
   DBoW2/FORB.cpp      
   DBoW2/FGOOD.cpp      
   DBoW2/FeatureVector.cpp
+  DBoW2/QueryResults.cpp
   DBoW2/ScoringObject.cpp)
 
 set(HDRS_DUTILS
@@ -37,9 +39,15 @@ if(NOT OpenCV_FOUND)
    endif()
 endif()
 
+set(RAPIDJSON_INCLUDE_DIR "" CACHE FILEPATH "Path to rapidjson includes")
+
+if(NOT EXISTS ${RAPIDJSON_INCLUDE_DIR}/rapidjson/rapidjson.h)
+	message(FATAL_ERROR "Can't find rapidjson.h in ${RAPIDJSON_INCLUDE_DIR}/rapidjson")
+endif()
+
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
 add_library(DBoW2 SHARED ${SRCS_DBOW2} ${SRCS_DUTILS})
 target_link_libraries(DBoW2 ${OpenCV_LIBS})
 
