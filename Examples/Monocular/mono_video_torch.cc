@@ -27,7 +27,6 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include"SystemBase.h"
 #include"System.h"
 #include "Converter.h"
 
@@ -63,7 +62,7 @@ int main(int argc, char **argv)
     cout.precision(17);
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System<> SLAM(argv[1], argv[2], ORB_SLAM3::SystemBase::MONOCULAR,true);
+    ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::MONOCULAR,true);
 
     // Main loop
     cv::Mat im, frame;

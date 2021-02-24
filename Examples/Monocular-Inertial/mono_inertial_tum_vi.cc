@@ -25,6 +25,7 @@
 
 #include<opencv2/core/core.hpp>
 
+#include<SystemBase.h>
 #include<System.h>
 #include "ImuTypes.h"
 
@@ -115,7 +116,7 @@ int main(int argc, char **argv)
     cout << "IMU data in the sequence: " << nImu << endl << endl;*/
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_MONOCULAR, true, 0, file_name);
+    ORB_SLAM3::System<> SLAM(argv[1],argv[2],ORB_SLAM3::SystemBase::IMU_MONOCULAR, true, 0, file_name);
 
     int proccIm = 0;
     for (seq = 0; seq<num_seq; seq++)

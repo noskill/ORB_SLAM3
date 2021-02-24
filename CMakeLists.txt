@@ -73,7 +73,7 @@ ${RAPIDJSON_INCLUDE_DIR}
 
 
 add_library(${PROJECT_NAME} SHARED
-src/System.cc
+src/SystemBase.cc
 src/Tracking.cc
 src/LocalMapping.cc
 src/LoopClosing.cc
@@ -101,6 +101,7 @@ src/OptimizableTypes.cpp
 src/MLPnPsolver.cpp
 src/TwoViewReconstruction.cc
 src/torchextractor.cc
+include/SystemBase.h
 include/System.h
 include/Tracking.h
 include/LocalMapping.h

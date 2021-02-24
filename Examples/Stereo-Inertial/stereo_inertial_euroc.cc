@@ -27,7 +27,8 @@
 #include <opencv2/core/core.hpp>
 
 
-#include<System.h>
+#include <SystemBase.h>
+#include <System.h>
 #include "ImuTypes.h"
 #include "Optimizer.h"
 
@@ -159,7 +160,7 @@ int main(int argc, char **argv)
     cout.precision(17);
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_STEREO, true);
+    ORB_SLAM3::System<> SLAM(argv[1],argv[2],ORB_SLAM3::SystemBase::IMU_STEREO, true);
 
     cv::Mat imLeft, imRight, imLeftRect, imRightRect;
     for (seq = 0; seq<num_seq; seq++)

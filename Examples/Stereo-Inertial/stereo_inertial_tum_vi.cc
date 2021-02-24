@@ -25,6 +25,7 @@
 
 #include<opencv2/core/core.hpp>
 
+#include<SystemBase.h>
 #include<System.h>
 #include "ImuTypes.h"
 
@@ -45,7 +46,7 @@ int main(int argc, char **argv)
     if (bFileName)
         file_name = string(argv[argc-1]);
 
-    if(argc < 7) 
+    if(argc < 7)
     {
         cerr << endl << "Usage: ./stereo_inertial_tum_vi path_to_vocabulary path_to_settings path_to_image_folder_1 path_to_image_folder_2 path_to_times_file path_to_imu_data (trajectory_file_name)" << endl;
         return 1;
@@ -119,7 +120,7 @@ int main(int argc, char **argv)
     cout << "IMU data in the sequence: " << nImu << endl << endl;*/
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_STEREO, true, 0, file_name);
+    ORB_SLAM3::System<> SLAM(argv[1],argv[2],ORB_SLAM3::SystemBase::IMU_STEREO, true, 0, file_name);
 
     int proccIm = 0;
     for (seq = 0; seq<num_seq; seq++)

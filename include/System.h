@@ -26,158 +26,198 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string>
-#include<thread>
 #include<opencv2/core/core.hpp>
 
-#include "Tracking.h"
-#include "FrameDrawer.h"
-#include "MapDrawer.h"
-#include "Atlas.h"
-#include "LocalMapping.h"
-#include "LoopClosing.h"
-#include "KeyFrameDatabase.h"
-#include "ORBVocabulary.h"
-#include "Viewer.h"
-#include "ImuTypes.h"
+#include "SystemBase.h"
 
 
 namespace ORB_SLAM3
 {
 
-class Verbose
+
+template<typename Vocabulary=ORBVocabulary>
+class System: public SystemBase
 {
+        // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
 public:
-    enum eLevel
-    {
-        VERBOSITY_QUIET=0,
-        VERBOSITY_NORMAL=1,
-        VERBOSITY_VERBOSE=2,
-        VERBOSITY_VERY_VERBOSE=3,
-        VERBOSITY_DEBUG=4
-    };
+    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
+               const bool bUseViewer=true, const int initFr=0, const string &strSequence=std::string(), const string &strLoadingFile=std::string()): SystemBase(sensor, bUseViewer)
+{
+    // Output welcome message
+    cout << endl <<
+    "ORB-SLAM3 Copyright (C) 2017-2020 Carlos Campos, Richard Elvira, Juan J. Gómez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza." << endl <<
+    "ORB-SLAM2 Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza." << endl <<
+    "This program comes with ABSOLUTELY NO WARRANTY;" << endl  <<
+    "This is free software, and you are welcome to redistribute it" << endl <<
+    "under certain conditions. See LICENSE.txt." << endl << endl;
 
-    static eLevel th;
+    cout << "Input sensor was set to: ";
 
-public:
-    static void PrintMess(std::string str, eLevel lev)
+    if(mSensor==MONOCULAR)
+        cout << "Monocular" << endl;
+    else if(mSensor==STEREO)
+        cout << "Stereo" << endl;
+    else if(mSensor==RGBD)
+        cout << "RGB-D" << endl;
+    else if(mSensor==IMU_MONOCULAR)
+        cout << "Monocular-Inertial" << endl;
+    else if(mSensor==IMU_STEREO)
+        cout << "Stereo-Inertial" << endl;
+
+    //Check settings file
+    cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
+    if(!fsSettings.isOpened())
     {
-        if(lev <= th)
-            cout << str << endl;
+       cerr << "Failed to open settings file at: " << strSettingsFile << endl;
+       exit(-1);
     }
 
-    static void SetTh(eLevel _th)
+    bool loadedAtlas = false;
+
+    //----
+    //Load ORB Vocabulary
+    cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
+
+    mpVocabulary = new Vocabulary();
+    bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+    if(!bVocLoad)
     {
-        th = _th;
+        cerr << "Wrong path to vocabulary. " << endl;
+        cerr << "Falied to open at: " << strVocFile << endl;
+        exit(-1);
     }
-};
+    cout << "Vocabulary loaded!" << endl << endl;
 
-class Viewer;
-class FrameDrawer;
-class Atlas;
-class Tracking;
-class LocalMapping;
-class LoopClosing;
+    //Create KeyFrame Database
+    mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
 
-class System
-{
-public:
-    // Input sensor
-    enum eSensor{
-        MONOCULAR=0,
-        STEREO=1,
-        RGBD=2,
-        IMU_MONOCULAR=3,
-        IMU_STEREO=4
-    };
+    //Create the Atlas
+    //mpMap = new Map();
+    mpAtlas = new Atlas(0);
+    //----
 
-    // File type
-    enum eFileType{
-        TEXT_FILE=0,
-        BINARY_FILE=1,
-    };
+    /*if(strLoadingFile.empty())
+    {
+        //Load ORB Vocabulary
+        cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
-public:
+        mpVocabulary = new ORBVocabulary();
+        bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+        if(!bVocLoad)
+        {
+            cerr << "Wrong path to vocabulary. " << endl;
+            cerr << "Falied to open at: " << strVocFile << endl;
+            exit(-1);
+        }
+        cout << "Vocabulary loaded!" << endl << endl;
 
-    // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
-    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string(), const string &strLoadingFile = std::string());
+        //Create KeyFrame Database
+        mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
 
-    // Proccess the given stereo frame. Images must be synchronized and rectified.
-    // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
-    // Returns the camera pose (empty if tracking fails).
-    cv::Mat TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::Point>& vImuMeas = vector<IMU::Point>(), string filename="");
+        //Create the Atlas
+        //mpMap = new Map();
+        mpAtlas = new Atlas(0);
+    }
+    else
+    {
+        //Load ORB Vocabulary
+        cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
-    // Process the given rgbd frame. Depthmap must be registered to the RGB frame.
-    // Input image: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
-    // Input depthmap: Float (CV_32F).
-    // Returns the camera pose (empty if tracking fails).
-    cv::Mat TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp, string filename="");
+        mpVocabulary = new ORBVocabulary();
+        bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+        if(!bVocLoad)
+        {
+            cerr << "Wrong path to vocabulary. " << endl;
+            cerr << "Falied to open at: " << strVocFile << endl;
+            exit(-1);
+        }
+        cout << "Vocabulary loaded!" << endl << endl;
 
-    // Proccess the given monocular frame and optionally imu data
-    // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
-    // Returns the camera pose (empty if tracking fails).
-    cv::Mat TrackMonocular(const cv::Mat &im, const double &timestamp, const vector<IMU::Point>& vImuMeas = vector<IMU::Point>(), string filename="");
+        cout << "Load File" << endl;
+
+        // Load the file with an earlier session
+        //clock_t start = clock();
+        bool isRead = LoadAtlas(strLoadingFile,BINARY_FILE);
+
+        if(!isRead)
+        {
+            cout << "Error to load the file, please try with other session file or vocabulary file" << endl;
+            exit(-1);
+        }
+        mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
+
+        mpAtlas->SetKeyFrameDababase(mpKeyFrameDatabase);
+        mpAtlas->SetORBVocabulary(mpVocabulary);
+        mpAtlas->PostLoad();
+        //cout << "KF in DB: " << mpKeyFrameDatabase->mnNumKFs << "; words: " << mpKeyFrameDatabase->mnNumWords << endl;
+
+        loadedAtlas = true;
+
+        mpAtlas->CreateNewMap();
+
+        //clock_t timeElapsed = clock() - start;
+        //unsigned msElapsed = timeElapsed / (CLOCKS_PER_SEC / 1000);
+        //cout << "Binary file read in " << msElapsed << " ms" << endl;
+
+        //usleep(10*1000*1000);
+    }*/
 
 
-    // This stops local mapping thread (map building) and performs only camera tracking.
-    void ActivateLocalizationMode();
-    // This resumes local mapping thread and performs SLAM again.
-    void DeactivateLocalizationMode();
+    if (mSensor==IMU_STEREO || mSensor==IMU_MONOCULAR)
+        mpAtlas->SetInertialSensor();
 
-    // Returns true if there have been a big map change (loop closure, global BA)
-    // since last call to this function
-    bool MapChanged();
+    //Create Drawers. These are used by the Viewer
+    mpFrameDrawer = new FrameDrawer(mpAtlas);
+    mpMapDrawer = new MapDrawer(mpAtlas, strSettingsFile);
 
-    // Reset the system (clear Atlas or the active map)
-    void Reset();
-    void ResetActiveMap();
+    //Initialize the Tracking thread
+    //(it will live in the main thread of execution, the one that called this constructor)
+    cout << "Seq. Name: " << strSequence << endl;
+    mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
+                             mpAtlas, mpKeyFrameDatabase, strSettingsFile, mSensor, strSequence);
 
-    // All threads will be requested to finish.
-    // It waits until all threads have finished.
-    // This function must be called before saving the trajectory.
-    void Shutdown();
+    //Initialize the Local Mapping thread and launch
+    this->mpLocalMapper = new LocalMapping(this, mpAtlas, mSensor==MONOCULAR || mSensor==IMU_MONOCULAR, mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO, strSequence);
+    mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
+    mpLocalMapper->mInitFr = initFr;
+    mpLocalMapper->mThFarPoints = fsSettings["thFarPoints"];
+    if(mpLocalMapper->mThFarPoints!=0)
+    {
+        cout << "Discard points further than " << mpLocalMapper->mThFarPoints << " m from current camera" << endl;
+        mpLocalMapper->mbFarPoints = true;
+    }
+    else
+        mpLocalMapper->mbFarPoints = false;
 
-    // Save camera trajectory in the TUM RGB-D dataset format.
-    // Only for stereo and RGB-D. This method does not work for monocular.
-    // Call first Shutdown()
-    // See format details at: http://vision.in.tum.de/data/datasets/rgbd-dataset
-    void SaveTrajectoryTUM(const string &filename);
+    //Initialize the Loop Closing thread and launch
+    // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
+    mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR); // mSensor!=MONOCULAR);
+    mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
 
-    // Save keyframe poses in the TUM RGB-D dataset format.
-    // This method works for all sensor input.
-    // Call first Shutdown()
-    // See format details at: http://vision.in.tum.de/data/datasets/rgbd-dataset
-    void SaveKeyFrameTrajectoryTUM(const string &filename);
+    //Initialize the Viewer thread and launch
+    if(bUseViewer)
+    {
+        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
+        mptViewer = new thread(&Viewer::Run, mpViewer);
+        mpTracker->SetViewer(mpViewer);
+        mpLoopCloser->mpViewer = mpViewer;
+        mpViewer->both = mpFrameDrawer->both;
+    }
 
-    void SaveTrajectoryEuRoC(const string &filename);
-    void SaveKeyFrameTrajectoryEuRoC(const string &filename);
+    //Set pointers between threads
+    mpTracker->SetLocalMapper(mpLocalMapper);
+    mpTracker->SetLoopClosing(mpLoopCloser);
 
-    // Save data used for initialization debug
-    void SaveDebugData(const int &iniIdx);
+    mpLocalMapper->SetTracker(mpTracker);
+    mpLocalMapper->SetLoopCloser(mpLoopCloser);
 
-    // Save camera trajectory in the KITTI dataset format.
-    // Only for stereo and RGB-D. This method does not work for monocular.
-    // Call first Shutdown()
-    // See format details at: http://www.cvlibs.net/datasets/kitti/eval_odometry.php
-    void SaveTrajectoryKITTI(const string &filename);
+    mpLoopCloser->SetTracker(mpTracker);
+    mpLoopCloser->SetLocalMapper(mpLocalMapper);
 
-    // TODO: Save/Load functions
-    // SaveMap(const string &filename);
-    // LoadMap(const string &filename);
+    // Fix verbosity
+    Verbose::SetTh(Verbose::VERBOSITY_QUIET);
 
-    // Information from most recent processed frame
-    // You can call this right after TrackMonocular (or stereo or RGBD)
-    int GetTrackingState();
-    std::vector<MapPoint*> GetTrackedMapPoints();
-    std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
-
-    // For debugging
-    double GetTimeFromIMUInit();
-    bool isLost();
-    bool isFinished();
-
-    void ChangeDataset();
-
-    //void SaveAtlas(int type);
+}
 
 private:
 
@@ -185,58 +225,11 @@ private:
 
     //string CalculateCheckSum(string filename, int type);
 
-    // Input sensor
-    eSensor mSensor;
-
     // ORB vocabulary used for place recognition and feature matching.
-    ORBVocabulary* mpVocabulary;
+    Vocabulary* mpVocabulary;
 
     // KeyFrame database for place recognition (relocalization and loop detection).
     KeyFrameDatabase* mpKeyFrameDatabase;
-
-    // Map structure that stores the pointers to all KeyFrames and MapPoints.
-    //Map* mpMap;
-    Atlas* mpAtlas;
-
-    // Tracker. It receives a frame and computes the associated camera pose.
-    // It also decides when to insert a new keyframe, create some new MapPoints and
-    // performs relocalization if tracking fails.
-    Tracking* mpTracker;
-
-    // Local Mapper. It manages the local map and performs local bundle adjustment.
-    LocalMapping* mpLocalMapper;
-
-    // Loop Closer. It searches loops with every new keyframe. If there is a loop it performs
-    // a pose graph optimization and full bundle adjustment (in a new thread) afterwards.
-    LoopClosing* mpLoopCloser;
-
-    // The viewer draws the map and the current camera pose. It uses Pangolin.
-    Viewer* mpViewer;
-
-    FrameDrawer* mpFrameDrawer;
-    MapDrawer* mpMapDrawer;
-
-    // System threads: Local Mapping, Loop Closing, Viewer.
-    // The Tracking thread "lives" in the main execution thread that creates the System object.
-    std::thread* mptLocalMapping;
-    std::thread* mptLoopClosing;
-    std::thread* mptViewer;
-
-    // Reset flag
-    std::mutex mMutexReset;
-    bool mbReset;
-    bool mbResetActiveMap;
-
-    // Change mode flags
-    std::mutex mMutexMode;
-    bool mbActivateLocalizationMode;
-    bool mbDeactivateLocalizationMode;
-
-    // Tracking state
-    int mTrackingState;
-    std::vector<MapPoint*> mTrackedMapPoints;
-    std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
-    std::mutex mMutexState;
 };
 
 }// namespace ORB_SLAM

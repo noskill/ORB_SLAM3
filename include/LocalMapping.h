@@ -33,7 +33,7 @@
 namespace ORB_SLAM3
 {
 
-class System;
+class SystemBase;
 class Tracking;
 class LoopClosing;
 class Atlas;
@@ -41,7 +41,7 @@ class Atlas;
 class LocalMapping
 {
 public:
-    LocalMapping(System* pSys, Atlas* pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName=std::string());
+    LocalMapping(SystemBase* pSys, Atlas* pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName=std::string());
 
     void SetLoopCloser(LoopClosing* pLoopCloser);
 
@@ -123,7 +123,7 @@ protected:
 
     cv::Mat SkewSymmetricMatrix(const cv::Mat &v);
 
-    System *mpSystem;
+    SystemBase *mpSystem;
 
     bool mbMonocular;
     bool mbInertial;

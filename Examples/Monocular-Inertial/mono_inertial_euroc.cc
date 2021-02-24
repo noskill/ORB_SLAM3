@@ -32,7 +32,8 @@
 #endif
 
 
-#include<System.h>
+#include <SystemBase.h>
+#include <System.h>
 #include "ImuTypes.h"
 
 using namespace std;
@@ -127,7 +128,7 @@ int main(int argc, char *argv[])
     cout << "IMU data in the sequence: " << nImu << endl << endl;*/
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_MONOCULAR, true);
+    ORB_SLAM3::System<> SLAM(argv[1],argv[2],ORB_SLAM3::SystemBase::IMU_MONOCULAR, true);
 
     int proccIm=0;
     for (seq = 0; seq<num_seq; seq++)

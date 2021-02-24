@@ -35,7 +35,7 @@
 #include "Extractor.h"
 #include "Initializer.h"
 #include "MapDrawer.h"
-#include "System.h"
+#include "SystemBase.h"
 #include "ImuTypes.h"
 
 #include "GeometricCamera.h"
@@ -51,13 +51,13 @@ class FrameDrawer;
 class Atlas;
 class LocalMapping;
 class LoopClosing;
-class System;
+class SystemBase;
 
 class Tracking
-{  
+{
 
 public:
-    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Atlas* pAtlas,
+    Tracking(SystemBase* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Atlas* pAtlas,
              KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, const string &_nameSeq=std::string());
 
     ~Tracking();
@@ -252,10 +252,10 @@ protected:
     KeyFrame* mpReferenceKF;
     std::vector<KeyFrame*> mvpLocalKeyFrames;
     std::vector<MapPoint*> mvpLocalMapPoints;
-    
-    // System
-    System* mpSystem;
-    
+
+    // SystemBase
+    SystemBase* mpSystem;
+
     //Drawers
     Viewer* mpViewer;
     FrameDrawer* mpFrameDrawer;
