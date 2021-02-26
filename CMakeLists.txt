@@ -132,6 +132,7 @@ include/MLPnPsolver.h
 include/TwoViewReconstruction.h
 include/Extractor.h
 include/torchextractor.h
+include/goodvocabulary.h
 )
 
 add_subdirectory(Thirdparty/g2o)
