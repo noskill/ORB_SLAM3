@@ -26,7 +26,7 @@
 
 #include "KeyFrame.h"
 #include "Frame.h"
-#include "ORBVocabulary.h"
+#include "Thirdparty/DBoW2/DBoW2/TemplatedVocabulary.h"
 #include "Map.h"
 
 #include <boost/serialization/base_object.hpp>
@@ -56,7 +56,7 @@ class KeyFrameDatabase
 
 public:
 
-    KeyFrameDatabase(const ORBVocabulary &voc);
+    KeyFrameDatabase(const DBoW2::DBoWVocabulary &voc);
 
    void add(KeyFrame* pKF);
 
@@ -78,12 +78,12 @@ public:
 
    void PreSave();
    void PostLoad(map<long unsigned int, KeyFrame*> mpKFid);
-   void SetORBVocabulary(ORBVocabulary* pORBVoc);
+   void SetDBoWVocabulary(DBoW2::DBoWVocabulary* pORBVoc);
 
 protected:
 
   // Associated vocabulary
-  const ORBVocabulary* mpVoc;
+  const DBoW2::DBoWVocabulary* mpVoc;
 
   // Inverted file
   std::vector<list<KeyFrame*> > mvInvertedFile;

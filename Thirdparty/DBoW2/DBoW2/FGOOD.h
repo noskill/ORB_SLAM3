@@ -23,7 +23,7 @@ class FGOOD: protected FClass
 public:
 
   /// Descriptor type
-  typedef cv::Mat1f TDescriptor;
+  typedef cv::Mat TDescriptor;
   /// Pointer to a single descriptor
   typedef const TDescriptor *pDescriptor;
   /// Descriptor length (in bytes)

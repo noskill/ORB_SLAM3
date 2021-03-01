@@ -1,5 +1,4 @@
-/**
- * This is a modified version of TemplatedVocabulary.h from DBoW2 (see below).
+/** * This is a modified version of TemplatedVocabulary.h from DBoW2 (see below).
  * Added functions: Save and Load from text files without using cv::FileStorage.
  * Date: August 2015
  * Raúl Mur-Artal
@@ -43,11 +42,51 @@ using namespace std;
 
 namespace DBoW2 {
 
+class DBoWVocabulary{
+public:
+  virtual double score(const BowVector &a, const BowVector &b) const=0;
+  virtual unsigned int size() const=0;
+};
+
+
+template<class TDescriptor>
+class TemplatedVocabularyBase: public DBoWVocabulary {
+public:
+
+  /**
+   * Transforms a set of descriptores into a bow vector
+   * @param features
+   * @param v (out) bow vector of weighted words
+   */
+  virtual void transform(const std::vector<TDescriptor>& features, BowVector &v)
+    const=0;
+
+  /**
+   * Transform a set of descriptors into a bow vector and a feature vector
+   * @param features
+   * @param v (out) bow vector
+   * @param fv (out) feature vector of nodes and feature indexes
+   * @param levelsup levels to go up the vocabulary tree to get the node index
+   */
+  virtual void transform(const std::vector<TDescriptor>& features,
+    BowVector &v, FeatureVector &fv, int levelsup) const=0;
+
+  /**
+   * Transforms a single feature into a word (without weight)
+   * @param feature
+   * @return word id
+   */
+  virtual WordId transform(const TDescriptor& feature) const=0;
+
+
+
+};
+
 /// @param TDescriptor class of descriptor
 /// @param F class of descriptor functions
 template<class TDescriptor, class F>
 /// Generic Vocabulary
-class TemplatedVocabulary
+class TemplatedVocabulary: public TemplatedVocabularyBase<TDescriptor>
 {
 public:
 
@@ -165,7 +204,7 @@ public:
    * @return score between vectors
    * @note the vectors must be already sorted and normalized if necessary
    */
-  inline double score(const BowVector &a, const BowVector &b) const;
+  virtual inline double score(const BowVector &a, const BowVector &b) const;
 
   /**
    * Returns the id of the node that is "levelsup" levels from the word given

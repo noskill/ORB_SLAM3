@@ -610,7 +610,7 @@ void KeyFrame::SetErase()
 }
 
 void KeyFrame::SetBadFlag()
-{   
+{
     // std::cout << "Erasing KF..." << std::endl;
     {
         unique_lock<mutex> lock(mMutexConnections);
@@ -1261,7 +1261,7 @@ cv::Mat KeyFrame::GetRightTranslation() {
     return trw.clone();
 }
 
-void KeyFrame::SetORBVocabulary(ORBVocabulary* pORBVoc)
+void KeyFrame::SetCVVocabulary(CVVocabulary* pORBVoc)
 {
     mpORBvocabulary = pORBVoc;
 }

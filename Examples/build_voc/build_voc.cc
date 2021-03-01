@@ -7,12 +7,12 @@
 
 using namespace DBoW2;
 
-std::vector<std::vector<cv::Mat_<float> > > loadFeatures();
-void createVoc(const std::vector<std::vector<cv::Mat_<float> > > & features);
-void testDatabase(const std::vector<std::vector<cv::Mat_<float> > > &features);
-void changeStructure(const cv::Mat &plain, std::vector<cv::Mat_<float> > &out);
+std::vector<std::vector<cv::Mat > > loadFeatures();
+void createVoc(const std::vector<std::vector<cv::Mat > > & features);
+void testDatabase(const std::vector<std::vector<cv::Mat > > &features);
+void changeStructure(const cv::Mat &plain, std::vector<cv::Mat > &out);
 
-typedef std::vector<std::vector<cv::Mat_<float> > > feature_vector;
+typedef std::vector<std::vector<cv::Mat > > feature_vector;
 
 
 feature_vector loadFeatures()
@@ -32,7 +32,7 @@ feature_vector loadFeatures()
       if (line.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
       {
          ss << "image " << img_num << std::endl;
-      	 features.push_back(std::vector<cv::Mat_<float> >());
+      	 features.push_back(std::vector<cv::Mat >());
          changeStructure(descriptors, features.back());
 	 std::cout << "lines read: " << line_num - start << std::endl;
 	 std::cout << "descriptors shape: " << descriptors.size() << std::endl;
@@ -71,7 +71,7 @@ feature_vector loadFeatures()
   return features;
 }
 
-void changeStructure(const cv::Mat &plain, std::vector<cv::Mat_<float> > &out)
+void changeStructure(const cv::Mat &plain, std::vector<cv::Mat > &out)
 {
   out.resize(plain.rows);
 
@@ -81,7 +81,7 @@ void changeStructure(const cv::Mat &plain, std::vector<cv::Mat_<float> > &out)
   }
 }
 
-void createVoc(const std::vector<std::vector<cv::Mat_<float> > > & features){
+void createVoc(const std::vector<std::vector<cv::Mat > > & features){
   // branching factor and depth levels from DBoW2 paper
   // should be good for now
   const int k = 10;
@@ -104,7 +104,7 @@ void createVoc(const std::vector<std::vector<cv::Mat_<float> > > & features){
   std::cout << "Done" <<std::endl;
 }
 
-void testDatabase(const std::vector<std::vector<cv::Mat_<float> > > &features)
+void testDatabase(const std::vector<std::vector<cv::Mat > > &features)
 {
 
   std::cout << "Reading dbow from " << "good_voc.json" << std::endl;

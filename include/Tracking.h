@@ -57,7 +57,7 @@ class Tracking
 {
 
 public:
-    Tracking(SystemBase* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Atlas* pAtlas,
+    Tracking(SystemBase* pSys, CVVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Atlas* pAtlas,
              KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, const string &_nameSeq=std::string());
 
     ~Tracking();
@@ -241,7 +241,7 @@ protected:
     Extractor* mpIniExtractor;
 
     //BoW
-    ORBVocabulary* mpORBVocabulary;
+    CVVocabulary* mpCVVocabulary;
     KeyFrameDatabase* mpKeyFrameDB;
 
     // Initalization (only for monocular)

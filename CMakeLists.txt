@@ -179,6 +179,11 @@ add_executable(mono_video
 Examples/Monocular/mono_video.cc)
 target_link_libraries(mono_video ${PROJECT_NAME})
 
+add_executable(mono_video_torch
+Examples/Monocular/mono_video_torch.cc)
+target_link_libraries(mono_video_torch ${PROJECT_NAME})
+
+
 add_executable(mono_tum
 Examples/Monocular/mono_tum.cc)
 target_link_libraries(mono_tum ${PROJECT_NAME})

@@ -69,7 +69,7 @@ std::string FGOOD::toString(const FGOOD::TDescriptor &a)
 
 void FGOOD::fromString(FGOOD::TDescriptor &a, const std::string &s)
 {
-  a.create(1, FGOOD::L);
+  a.create(1, FGOOD::L, CV_32F);
   float *p = a.ptr<float>();
 
   stringstream ss(s);

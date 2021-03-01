@@ -1,9 +1,9 @@
 #ifndef GOODVOCABULARY_H
 #define GOODVOCABULARY_H
 
-#include "DBoW2/FGOOD.h"
-#include "DBoW2/TemplatedVocabulary.h"
-#include "DBoW2/TemplatedDatabase.h"
+#include "Thirdparty/DBoW2/DBoW2/FGOOD.h"
+#include "Thirdparty/DBoW2/DBoW2/TemplatedVocabulary.h"
+#include "Thirdparty/DBoW2/DBoW2/TemplatedDatabase.h"
 
 namespace ORB_SLAM3
 {

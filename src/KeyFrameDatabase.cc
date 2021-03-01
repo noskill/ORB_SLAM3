@@ -29,7 +29,7 @@ using namespace std;
 namespace ORB_SLAM3
 {
 
-KeyFrameDatabase::KeyFrameDatabase (const ORBVocabulary &voc):
+KeyFrameDatabase::KeyFrameDatabase (const DBoW2::DBoWVocabulary &voc):
     mpVoc(&voc)
 {
     mvInvertedFile.resize(voc.size());
@@ -924,10 +924,10 @@ void KeyFrameDatabase::PostLoad(map<long unsigned int, KeyFrame*> mpKFid)
 
 }
 
-void KeyFrameDatabase::SetORBVocabulary(ORBVocabulary* pORBVoc)
+void KeyFrameDatabase::SetDBoWVocabulary(DBoW2::DBoWVocabulary* pORBVoc)
 {
-    ORBVocabulary** ptr;
-    ptr = (ORBVocabulary**)( &mpVoc );
+    DBoW2::DBoWVocabulary** ptr;
+    ptr = (DBoW2::DBoWVocabulary**)( &mpVoc );
     *ptr = pORBVoc;
 
     mvInvertedFile.clear();
