@@ -1,0 +1,53 @@
+%YAML:1.0
+
+#--------------------------------------------------------------------------------------------
+# Camera Parameters. Adjust them!
+#--------------------------------------------------------------------------------------------
+Camera.type: "PinHole"
+
+# Camera calibration and distortion parameters (OpenCV) 
+Camera.fx: 580.0 # 1168.5227646374713
+Camera.fy: 580.0 #1168.5227646374713
+Camera.cx: 480.0 #960.0
+Camera.cy: 270.0 # 540.0
+
+Camera.k1: -0.05702990  
+Camera.k2: 0.120794
+Camera.p1: 0.0 
+Camera.p2: 0.0
+Camera.k3: -0.123172
+
+# Camera frames per second 
+Camera.fps: 30.0
+
+# Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
+Camera.RGB: 1
+
+# Camera resolution
+Camera.width: 960 #1920
+Camera.height: 540 #1080
+
+ExtractorType: "Torch" # ORB or Torch
+
+#--------------------------------------------------------------------------------------------
+# Viewer Parameters
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3
+Viewer.ViewpointX: 0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500
+
+
+
+# torchextractor parameters
+torchextractor.scaleFactor = 1.5
+torchextractor.nLevels = 1
+torchextractor.threshold = 0.021075525
+torchextractor.model_path = "/home/noskill/projects/neuro-fem/fem/snapshots/traced_goodpoint.pt" 
+

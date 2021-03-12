@@ -64,7 +64,9 @@ public:
 
     // Parse the config file
     bool ParseCamParamFile(cv::FileStorage &fSettings);
+    bool ParseParamFile(cv::FileStorage &fSettings);
     bool ParseORBParamFile(cv::FileStorage &fSettings);
+    bool ParseTorchParamFile(cv::FileStorage &fSettings);
     bool ParseIMUParamFile(cv::FileStorage &fSettings);
 
     // Preprocess the input and call Track(). Extract features and performs stereo matching.

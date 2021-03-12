@@ -14,7 +14,7 @@ namespace ORB_SLAM3
 class Extractor
 {
 public:
-
+    Extractor(float scale_factor, int n_levels);
     // Compute the ORB features and descriptors on an image.
     // ORB are dispersed on the image using an octree.
     // Mask is ignored in the current implementation.
@@ -22,20 +22,37 @@ public:
                     std::vector<cv::KeyPoint>& _keypoints,
                     cv::OutputArray _descriptors, std::vector<int> &vLappingArea)=0;
 
-    virtual int inline GetLevels()=0;
-    virtual float inline GetScaleFactor()=0;
+    virtual int inline GetLevels() { return nlevels;};
+    virtual float inline GetScaleFactor() { return scaleFactor; };
 
-    virtual std::vector<float> inline GetScaleFactors()=0;
+    std::vector<float> inline GetScaleFactors(){
+        return mvScaleFactor;
+    }
 
-    virtual std::vector<float> inline GetInverseScaleFactors()=0;
+    std::vector<float> inline GetInverseScaleFactors(){
+        return mvInvScaleFactor;
+    }
 
-    virtual std::vector<float> inline GetScaleSigmaSquares()=0;
+    std::vector<float> inline GetScaleSigmaSquares(){
+        return mvLevelSigma2;
+    }
 
-    virtual std::vector<float> inline GetInverseScaleSigmaSquares()=0;
+    std::vector<float> inline GetInverseScaleSigmaSquares(){
+        return mvInvLevelSigma2;
+    }
 
     virtual std::vector<cv::Mat> & getImagePyramid()=0;
 
     virtual ~Extractor()=default;
+
+protected:
+    int nlevels;
+    float scaleFactor;
+
+    std::vector<float> mvScaleFactor;
+    std::vector<float> mvInvScaleFactor;
+    std::vector<float> mvLevelSigma2;
+    std::vector<float> mvInvLevelSigma2;
 };
 
 } // namespace

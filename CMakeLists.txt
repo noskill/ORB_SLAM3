@@ -16,20 +16,20 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated -O3 -march=native")
 
 # Check C++11 or C++0x support
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-   add_definitions(-DCOMPILEDWITHC11)
-   message(STATUS "Using flag -std=c++11.")
-elseif(COMPILER_SUPPORTS_CXX0X)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-   add_definitions(-DCOMPILEDWITHC0X)
-   message(STATUS "Using flag -std=c++0x.")
-else()
-   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
+#include(CheckCXXCompilerFlag)
+#CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+#CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+#if(COMPILER_SUPPORTS_CXX11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+add_definitions(-DCOMPILEDWITHC11)
+#   message(STATUS "Using flag -std=c++11.")
+#elseif(COMPILER_SUPPORTS_CXX0X)
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+#   add_definitions(-DCOMPILEDWITHC0X)
+#   message(STATUS "Using flag -std=c++0x.")
+#else()
+#   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+#endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
@@ -73,10 +73,14 @@ ${RAPIDJSON_INCLUDE_DIR}
 
 
 add_library(${PROJECT_NAME} SHARED
+src/utils.cc
 src/SystemBase.cc
+src/torchextractor.cc
+src/torchextractor-util.cc
 src/Tracking.cc
 src/LocalMapping.cc
 src/LoopClosing.cc
+src/Extractor.cc
 src/ORBextractor.cc
 src/ORBmatcher.cc
 src/FrameDrawer.cc
@@ -100,7 +104,7 @@ src/CameraModels/KannalaBrandt8.cpp
 src/OptimizableTypes.cpp
 src/MLPnPsolver.cpp
 src/TwoViewReconstruction.cc
-src/torchextractor.cc
+include/utils.h
 include/SystemBase.h
 include/System.h
 include/Tracking.h
@@ -132,6 +136,7 @@ include/MLPnPsolver.h
 include/TwoViewReconstruction.h
 include/Extractor.h
 include/torchextractor.h
+include/torchextractor-util.h
 include/goodvocabulary.h
 )
 

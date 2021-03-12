@@ -29,6 +29,8 @@
 #include"G2oTypes.h"
 #include"Optimizer.h"
 #include"PnPsolver.h"
+#include "torchextractor-util.h"
+#include "ORBextractor.h"
 
 #include<iostream>
 
@@ -37,7 +39,6 @@
 #include <include/CameraModels/Pinhole.h>
 #include <include/CameraModels/KannalaBrandt8.h>
 #include <include/MLPnPsolver.h>
-#include "ORBextractor.h"
 
 
 using namespace std;
@@ -63,7 +64,7 @@ Tracking::Tracking(SystemBase *pSys, CVVocabulary* pVoc, FrameDrawer *pFrameDraw
     }
 
     // Load ORB parameters
-    bool b_parse_orb = ParseORBParamFile(fSettings);
+    bool b_parse_orb = ParseParamFile(fSettings);
     if(!b_parse_orb)
     {
         std::cout << "*Error with the ORB parameters in the config file*" << std::endl;
@@ -700,6 +701,45 @@ bool Tracking::ParseCamParamFile(cv::FileStorage &fSettings)
     return true;
 }
 
+bool Tracking::ParseParamFile(cv::FileStorage &fSettings){
+    cv::FileNode node = fSettings["ExtractorType"];
+    if (!node.empty() and node.isString()){
+        std::string ExtractorType = node.operator std::string();
+	if (ExtractorType == "Torch"){
+	    return ParseTorchParamFile(fSettings);
+	}
+    }
+    return ParseORBParamFile(fSettings);
+}
+
+bool Tracking::ParseTorchParamFile(cv::FileStorage &fSettings) {
+    cv::FileNode node = fSettings["torchextractor.model_path"];
+    if (not node.isString()) {
+        throw std::runtime_error("can't read model path");
+    }
+    std::string model_path = node.operator std::string();
+
+    node = fSettings["torchextractor.scaleFactor"];
+    float scale_factor = node.operator float();
+
+    node = fSettings["torchextractor.nLevels"];
+    float n_levels = node.operator int();
+
+    node = fSettings["torchextractor.threshold"];
+    float threshold = node.operator float();
+
+    if (mSensor==SystemBase::STEREO || mSensor==SystemBase::IMU_STEREO) {
+        Extractor * ext =  createTorchExtractor(model_path, threshold, scale_factor, n_levels);
+        mpExtractorLeft = ext;
+	mpExtractorRight = createTorchExtractor(ext, threshold, scale_factor, n_levels);
+    }
+
+    if (mSensor==SystemBase::MONOCULAR || mSensor==SystemBase::IMU_MONOCULAR) {
+        mpIniExtractor = createTorchExtractor(model_path, threshold, scale_factor, n_levels);
+    }
+
+}
+
 bool Tracking::ParseORBParamFile(cv::FileStorage &fSettings)
 {
     bool b_miss_params = false;
@@ -766,10 +806,7 @@ bool Tracking::ParseORBParamFile(cv::FileStorage &fSettings)
         return false;
     }
 
-    node = fSettings["ExtractorType"];
-    if (!node.empty() and node.isString()){
-        std::string ExtractorType = node.operator std::string();
-    }
+
     mpExtractorLeft = new ORBextractor(nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);
 
     if(mSensor==SystemBase::STEREO || mSensor==SystemBase::IMU_STEREO)
