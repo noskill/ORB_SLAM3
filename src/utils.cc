@@ -3,11 +3,11 @@
 #if (CV_MAJOR_VERSION > 3)
 #include <opencv2/imgproc/types_c.h>
 #include <opencv2/opencv.hpp>
-using namespace cv;
 #define CV_LOAD_IMAGE_UNCHANGED IMREAD_UNCHANGED
 #endif
 
 
+using namespace cv;
 namespace ORB_SLAM3{
 
 std::vector<cv::Mat> ComputePyramid(cv::Mat & image, int n_levels, const std::vector<float> & InvScaleFactor) {

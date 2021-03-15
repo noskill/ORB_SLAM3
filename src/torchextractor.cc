@@ -49,9 +49,10 @@ std::vector < std::vector< cv::KeyPoint> > ComputeKeypoints(torch::jit::script::
 	std::vector < std::vector< cv::KeyPoint> > allKeypoints;
 	std::size_t nlevels = pyramid.size();
 	allKeypoints.resize(nlevels);
+        using namespace cv;
         for (std::size_t level = 0; level < nlevels; ++level) {
             cv::Mat const & img = pyramid[level];
-	    assert(img.type() == cv::CV_8U);
+	    assert(img.type() == CV_8U);
 	    auto tensor_image = torch::from_blob(img.data, { img.rows, img.cols, img.channels() }, at::kByte);
 	    tensor_image = tensor_image.toType(c10::kFloat) / 255.0;
 	    std::vector<c10::IValue> input({tensor_image});
