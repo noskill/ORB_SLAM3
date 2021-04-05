@@ -105,6 +105,8 @@ void KeyFrame::ComputeBoW()
         // Feature vector associate features with nodes in the 4th level (from leaves up)
         // We assume the vocabulary tree has 6 levels, change the 4 otherwise
         mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4);
+        assert(not mBowVec.empty());
+        assert(not mFeatVec.empty());
     }
 }
 
@@ -1264,6 +1266,7 @@ cv::Mat KeyFrame::GetRightTranslation() {
 void KeyFrame::SetCVVocabulary(CVVocabulary* pORBVoc)
 {
     mpORBvocabulary = pORBVoc;
+    assert(not mpORBvocabulary->empty());
 }
 
 void KeyFrame::SetKeyFrameDatabase(KeyFrameDatabase* pKFDB)

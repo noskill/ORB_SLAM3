@@ -49,11 +49,13 @@ namespace ORB_SLAM3
 
 Tracking::Tracking(SystemBase *pSys, CVVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Atlas *pAtlas, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, const string &_nameSeq):
     mState(NO_IMAGES_YET), mSensor(sensor), mTrackedFr(0), mbStep(false),
+    mpExtractorLeft(nullptr), mpExtractorRight(nullptr), mpIniExtractor(nullptr),
     mbOnlyTracking(false), mbMapUpdated(false), mbVO(false), mpCVVocabulary(pVoc), mpKeyFrameDB(pKFDB),
     mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys), mpViewer(NULL),
     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpAtlas(pAtlas), mnLastRelocFrameId(0), time_recently_lost(5.0),
     mnInitialFrameId(0), mbCreatedMap(false), mnFirstFrameId(0), mpCamera2(nullptr)
 {
+    assert(not mpCVVocabulary->empty());
     // Load camera parameters from settings file
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
@@ -736,8 +738,16 @@ bool Tracking::ParseTorchParamFile(cv::FileStorage &fSettings) {
 
     if (mSensor==SystemBase::MONOCULAR || mSensor==SystemBase::IMU_MONOCULAR) {
         mpIniExtractor = createTorchExtractor(model_path, threshold, scale_factor, n_levels);
+	mpExtractorLeft = createTorchExtractor(mpIniExtractor, threshold, scale_factor, n_levels);
     }
+    ORBmatcher::setDistance(ORBmatcher::DescriptorDistanceL2);
 
+    node = fSettings["torchextractor.nn_threshold"];
+    float nn_threshold = node.operator float();
+    ORBmatcher::set_th_low(nn_threshold);
+    ORBmatcher::set_th_high(nn_threshold * 1.1);
+    assert(ORBmatcher::TH_LOW == nn_threshold);
+    return true;
 }
 
 bool Tracking::ParseORBParamFile(cv::FileStorage &fSettings)
