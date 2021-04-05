@@ -79,7 +79,8 @@ public:
     cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
     mpVocabulary = new Vocabulary();
-    bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+    bool bVocLoad = mpVocabulary->load_json(strVocFile);
+    assert(not mpVocabulary->empty());
     if(!bVocLoad)
     {
         cerr << "Wrong path to vocabulary. " << endl;

@@ -86,8 +86,6 @@ protected:
     int minThFAST;
 
     std::vector<int> mnFeaturesPerLevel;
-
-    std::vector<int> umax;
 };
 
 } //namespace ORB_SLAM

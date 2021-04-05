@@ -53,7 +53,14 @@ protected:
     std::vector<float> mvInvScaleFactor;
     std::vector<float> mvLevelSigma2;
     std::vector<float> mvInvLevelSigma2;
+    std::vector<int> umax;
 };
+
+const int PATCH_SIZE = 31;
+const int HALF_PATCH_SIZE = 15;
+
+void computeOrientation(const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints, const std::vector<int>& umax);
+float IC_Angle(const cv::Mat& image, cv::Point2f pt,  const std::vector<int> & u_max);
 
 } // namespace
 #endif // EXTRACTOR_H
