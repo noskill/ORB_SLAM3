@@ -79,6 +79,7 @@ public:
   virtual WordId transform(const TDescriptor& feature) const=0;
 
 
+  virtual bool empty() const;
 
 };
 
@@ -170,7 +171,7 @@ public:
    * Returns whether the vocabulary is empty (i.e. it has not been trained)
    * @return true iff the vocabulary is empty
    */
-  virtual inline bool empty() const;
+  virtual bool empty() const;
 
   /**
    * Transforms a set of descriptores into a bow vector
@@ -314,7 +315,7 @@ public:
    * Loads the vocabulary from a json file
    * @param filename path to json
    */
-  virtual void load_json(const std::string &filename);
+  virtual bool load_json(const std::string &filename);
 
   /**
    * Loads the vocabulary from a file storage node
@@ -1522,7 +1523,7 @@ void TemplatedVocabulary<TDescriptor,F>::load(const std::string &filename)
 }
 
 template<class TDescriptor, class F>
-void TemplatedVocabulary<TDescriptor,F>::load_json(const std::string &filename) {
+bool TemplatedVocabulary<TDescriptor,F>::load_json(const std::string &filename) {
      FILE* fp = fopen(filename.c_str(), "r");
      if (fp == nullptr){
          throw std::runtime_error("Could not open file " + filename);
@@ -1565,7 +1566,7 @@ void TemplatedVocabulary<TDescriptor,F>::load_json(const std::string &filename) 
      {
        NodeId nid = nodes[i]["nodeId"].GetInt();
        NodeId pid = nodes[i]["parentId"].GetInt();
-       WordValue weight = (WordValue)nodes[i]["weight"].GetInt();
+       WordValue weight = (WordValue)nodes[i]["weight"].GetDouble();
        string d = nodes[i]["descriptor"].GetString();
 
        m_nodes[nid].id = nid;
@@ -1577,7 +1578,7 @@ void TemplatedVocabulary<TDescriptor,F>::load_json(const std::string &filename) 
      }
 
      // words
-     const Value & words = fvoc["nodes"];
+     const Value & words = fvoc["words"];
 
      m_words.resize(words.Size());
 
@@ -1589,6 +1590,7 @@ void TemplatedVocabulary<TDescriptor,F>::load_json(const std::string &filename) 
        m_nodes[nid].word_id = wid;
        m_words[wid] = &m_nodes[nid];
      }
+    return true;
 
 }
 
