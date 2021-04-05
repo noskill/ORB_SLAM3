@@ -48,6 +48,7 @@ Viewer.ViewpointF: 500
 # torchextractor parameters
 torchextractor.scaleFactor: 1.5
 torchextractor.nLevels: 1
-torchextractor.threshold: 0.021075525
+torchextractor.threshold: 0.036075525
+torchextractor.nn_threshold: 0.85
 torchextractor.model_path: "./traced_goodpoint.pt"
 
