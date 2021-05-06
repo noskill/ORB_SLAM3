@@ -162,6 +162,9 @@ public:
    * @return di levels
    */
   inline int getDirectIndexLevels() const;
+
+  QueryResults query(const BowVector &vec, int max_results=1, int max_id=-1) const;
+
   
   /**
    * Queries the database with some features
@@ -573,6 +576,15 @@ void TemplatedDatabase<TDescriptor, F>::query(
 }
 
 // --------------------------------------------------------------------------
+
+template<class TDescriptor, class F>
+QueryResults TemplatedDatabase<TDescriptor, F>::query(
+  const BowVector &vec, int max_results, int max_id) const
+{
+   QueryResults result;
+   this->query(vec, result, max_results, max_id);
+   return result;
+}
 
 template<class TDescriptor, class F>
 void TemplatedDatabase<TDescriptor, F>::query(
