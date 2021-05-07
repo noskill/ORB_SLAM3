@@ -43,7 +43,8 @@ point_desc_t ComputeKeypoints(torch::jit::script::Module & module,
 int TorchExtractor::operator()(cv::InputArray _image, cv::InputArray _mask,
                     std::vector<cv::KeyPoint>& _keypoints,
                     cv::OutputArray _descriptors, std::vector<int> &vLappingArea) {
-	if(_image.empty())
+
+	    if(_image.empty())
             return -1;
 
         cv::Mat image = _image.getMat();
@@ -53,7 +54,7 @@ int TorchExtractor::operator()(cv::InputArray _image, cv::InputArray _mask,
            throw std::runtime_error("Only one level is supported");
         }
         // Pre-compute the scale pyramid
-	std::vector<cv::Mat> pyramid = ComputePyramid(image, GetLevels(), GetInverseScaleFactors());
+    	std::vector<cv::Mat> pyramid = ComputePyramid(image, GetLevels(), GetInverseScaleFactors());
 
         auto [allKeypoints, desc] = ComputeKeypoints(module,
 			pyramid, threshold);
@@ -121,16 +122,16 @@ point_desc_t ComputeKeypoints(torch::jit::script::Module & module,
             auto tensor_image = cvMattoTensor(img);
             tensor_image = torch::unsqueeze(tensor_image, 0);
             tensor_image = torch::unsqueeze(tensor_image, 0);
-	    tensor_image = tensor_image.toType(c10::kFloat) / 255.0;
+            tensor_image = tensor_image.toType(c10::kFloat) / 255.0;
             assert(tensor_image.max().item<float>() <= 1.0);
             assert(tensor_image.max().item<float>() > 0.05);
-	    auto thres = torch::tensor({threshold});
-	    std::vector<c10::IValue> input({tensor_image, thres});
-	    auto outputs = module.forward(input).toTuple();
-	    auto points = outputs->elements()[0].toTensor();
-	    auto desc = outputs->elements()[1].toTensor();
+    	    auto thres = torch::tensor({threshold});
+    	    std::vector<c10::IValue> input({tensor_image, thres});
+    	    auto outputs = module.forward(input).toTuple();
+    	    auto points = outputs->elements()[0].toTensor();
+    	    auto desc = outputs->elements()[1].toTensor();
 
-	    std::cout << "points " << points.sizes() << std::endl;
+    	    std::cout << "points " << points.sizes() << std::endl;
             std::cout << "descriptors " << desc.sizes() << std::endl;
             auto & current_level_keypoints = allKeypoints[level];
             for(int k=0; k < points.sizes()[0]; k++){
