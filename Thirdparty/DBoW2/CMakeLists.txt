@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.4...3.18)
 project(DBoW2)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3 -march=native ")
@@ -49,8 +49,9 @@ endif()
 
 find_package(PythonLibs 3 REQUIRED)
 find_package (Python3 COMPONENTS NumPy)
+add_subdirectory(pybind11)
 
-include_directories(${OpenCV_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} ${pybind11_INCLUDE_DIRS})
 add_library(DBoW2 SHARED ${SRCS_DBOW2} ${SRCS_DUTILS})
 target_link_libraries(DBoW2 PRIVATE ${OpenCV_LIBS})
 
@@ -58,7 +59,6 @@ add_library(ndarray STATIC ${SRC_NDARRAY})
 set_property(TARGET ndarray PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(ndarray PRIVATE ${PYTHON_LIBRARIES} ${OpenCV_LIBS})
 
-add_subdirectory(pybind11)
 pybind11_add_module(DBoW DBoW2/binding.cpp)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 target_link_libraries(DBoW PRIVATE DBoW2 ndarray)
