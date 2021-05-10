@@ -47,7 +47,6 @@ if(NOT EXISTS ${RAPIDJSON_INCLUDE_DIR}/rapidjson/rapidjson.h)
 	message(FATAL_ERROR "Can't find rapidjson.h in ${RAPIDJSON_INCLUDE_DIR}/rapidjson")
 endif()
 
-find_package(PythonLibs 3 REQUIRED)
 find_package (Python3 COMPONENTS NumPy)
 add_subdirectory(pybind11)
 
