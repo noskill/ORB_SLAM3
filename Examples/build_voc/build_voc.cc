@@ -42,7 +42,7 @@ feature_vector loadFeatures()
 	 if (img_num % 300 == 0){
              std::cout << "img num " << img_num << std::endl;
 	 }
-         if (30000 == img_num) {
+         if (3500 == img_num) {
              break;
          }
 	 continue;
@@ -84,7 +84,7 @@ void changeStructure(const cv::Mat &plain, std::vector<cv::Mat > &out)
 void createVoc(const std::vector<std::vector<cv::Mat > > & features){
   // branching factor and depth levels from DBoW2 paper
   // should be good for now
-  const int k = 10;
+  const int k = 7;
   const int L = 6;
   const WeightingType weight = TF_IDF;
   const ScoringType scoring = L1_NORM;
@@ -100,7 +100,7 @@ void createVoc(const std::vector<std::vector<cv::Mat > > & features){
 
   // save the vocabulary to disk
   std::cout << std::endl << "Saving vocabulary..." << std::endl;
-  voc.save("good_voc.yml.gz");
+  voc.save("good_voc.json");
   std::cout << "Done" <<std::endl;
 }
 
@@ -160,7 +160,7 @@ void testDatabase(const std::vector<std::vector<cv::Mat > > &features)
 
 int main(int argc, char ** argv){
     feature_vector features = loadFeatures();
-//    createVoc(features);
+    createVoc(features);
     testDatabase(features);
     return 0;
 }
