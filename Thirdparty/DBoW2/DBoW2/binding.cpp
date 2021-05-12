@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "ndarray_converter.h"
+#include "FORB.h"
 #include "FGOOD.h"
 #include "TemplatedVocabulary.h"
 #include "TemplatedDatabase.h"
@@ -17,23 +18,46 @@ typedef DBoW2::TemplatedVocabulary<DBoW2::FGOOD::TDescriptor, DBoW2::FGOOD>
 typedef DBoW2::TemplatedDatabase<DBoW2::FGOOD::TDescriptor, DBoW2::FGOOD>
   GOODDatabase;
 
+typedef DBoW2::TemplatedVocabulary<DBoW2::FORB::TDescriptor, DBoW2::FORB>
+  ORBVocabulary;
+
+typedef DBoW2::TemplatedDatabase<DBoW2::FORB::TDescriptor, DBoW2::FORB>
+  ORBDatabase;
+
+
+#define VOCAB(X, Name)  \
+    py::class_<X>(m, Name) \
+        .def(py::init<>()) \
+        .def("load_json", &X::load_json) \
+        .def("load", static_cast<void(X::*)(const std::string &)>(&X::load));
+
+#define DB(X, Name, Voc) \
+    py::class_<X>(m, Name) \
+        .def(py::init<const Voc &, bool, int>()) \
+        .def("add",   static_cast<DBoW2::EntryId (X::*)(const std::vector<X::TDesc> &)> (&X::add), \
+			"add an item to DBoW\nfeatures - list of cv::Mat, each cv::Mat 1x256 matrix", \
+             py::arg("features")) \
+        .def("query", static_cast<DBoW2::QueryResults (X::*)(const std::vector<X::TDesc> &, int, int) const> \
+	        (&X::query) , "query database with a feature matrix", \
+             py::arg("features"), py::arg("max_results")=1, py::arg("max_id")=-1) \
+	.def("size", &X::size);
+
 
 PYBIND11_MAKE_OPAQUE(std::vector<DBoW2::Result>);
 
 PYBIND11_MODULE(DBoW, m) {
     NDArrayConverter::init_numpy();
 
-    py::class_<GOODVocabulary>(m, "GOODVocabulary")
-        .def(py::init<>())
-        .def("load_json", &GOODVocabulary::load_json);
+    VOCAB(GOODVocabulary, "GOODVocabulary")
+    VOCAB(ORBVocabulary, "ORBVocabulary")
 
     py::class_<DBoW2::FeatureVector>(m, "FeatureVector")
         .def(py::init<>());
 
     py::class_<DBoW2::Result>(m, "Result")
-    .def_readwrite("Id", &DBoW2::Result::Id)
-    .def_readwrite("Score", &DBoW2::Result::Score)
-    .def_readwrite("nWords", &DBoW2::Result::nWords);
+        .def_readwrite("Id", &DBoW2::Result::Id)
+        .def_readwrite("Score", &DBoW2::Result::Score)
+        .def_readwrite("nWords", &DBoW2::Result::nWords);
 
     py::class_<std::vector<DBoW2::Result> >(m, "ResultVector")
         .def(py::init<>())
@@ -46,17 +70,6 @@ PYBIND11_MODULE(DBoW, m) {
 
     py::class_<DBoW2::QueryResults, std::vector<DBoW2::Result> >(m, "QueryResults");
 
-    py::class_<GOODDatabase>(m, "GOODDatabase")
-        .def(py::init<const GOODVocabulary &, bool, int>())
-        .def("add",   static_cast<DBoW2::EntryId (GOODDatabase::*)(const std::vector<GOODDatabase::TDesc> &)> (&GOODDatabase::add),
-			"add an item to DBoW\n \
-			features - list of cv::Mat, each cv::Mat 1x256 matrix",
-             py::arg("features"))
-
-        .def("query", static_cast<DBoW2::QueryResults (GOODDatabase::*)(const std::vector<GOODDatabase::TDesc> &, int, int) const>
-	        (&GOODDatabase::query) , "query database with a feature matrix",
-             py::arg("features"), py::arg("max_results")=1, py::arg("max_id")=-1)
-
-	.def("size", &GOODDatabase::size);
-
+    DB(GOODDatabase, "GOODDatabase", GOODVocabulary)
+    DB(ORBDatabase, "ORBDatabase", ORBVocabulary)
 }
